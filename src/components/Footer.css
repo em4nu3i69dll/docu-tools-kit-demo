@@ -1,0 +1,65 @@
+.pie-pagina {
+    margin-top: auto;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(10, 10, 11, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.contenido-pie-pagina {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.derechos p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.enlaces-pie-pagina {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.enlace-pie-pagina {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.enlace-pie-pagina:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.enlace-pie-pagina svg {
+    transition: transform 0.2s ease;
+}
+
+.enlace-pie-pagina:hover svg {
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .contenido-pie-pagina {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .enlaces-pie-pagina {
+        justify-content: center;
+    }
+}
+

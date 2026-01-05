@@ -1,0 +1,10 @@
+.diseno-aplicacion {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.contenido-principal {
+  flex: 1;
+  padding: 4rem 0;
+}

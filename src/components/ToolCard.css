@@ -1,0 +1,106 @@
+.enlace-tarjeta-herramienta {
+    display: block;
+    height: 100%;
+}
+
+.tarjeta-herramienta {
+    position: relative;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(20, 20, 22, 0.6) 0%, rgba(10, 10, 11, 0.4) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.tarjeta-herramienta:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.brillo-fondo-tarjeta {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    transition: opacity 0.3s ease;
+}
+
+.tarjeta-herramienta:hover .brillo-fondo-tarjeta {
+    opacity: 0.25;
+}
+
+.contenedor-contenido-tarjeta {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.caja-icono {
+    width: 56px;
+    height: 56px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.contenido-texto {
+    flex: 1;
+}
+
+.contenido-texto h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.contenido-texto p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #a1a1aa;
+    line-height: 1.6;
+}
+
+.pie-tarjeta {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.tarjeta-herramienta:hover .pie-tarjeta {
+    opacity: 1;
+}
+
+.texto-probar {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+}
+
+.icono-flecha {
+    color: white;
+    transition: transform 0.2s;
+}
+
+.tarjeta-herramienta:hover .icono-flecha {
+    transform: translate(2px, -2px);
+}
