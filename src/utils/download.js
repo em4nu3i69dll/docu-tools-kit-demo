@@ -2,7 +2,6 @@ import { saveAs } from 'file-saver';
 
 export const descargarArchivo = (datos, nombreArchivo) => {
     if (!datos) {
-        console.error('Error: No se proporcionaron datos');
         return;
     }
 
@@ -50,7 +49,6 @@ export const descargarArchivo = (datos, nombreArchivo) => {
     try {
         saveAs(blob, nombreSeguro);
     } catch (error) {
-        console.error('Error al descargar:', error);
         const url = window.URL.createObjectURL(blob);
         const enlace = document.createElement('a');
         enlace.href = url;

@@ -73,7 +73,6 @@ export default function JpgToPdf() {
             const pdfBytes = await pdfDoc.save();
             descargarArchivo(new Blob([pdfBytes], { type: 'application/pdf' }), 'imagenes-a-pdf.pdf');
         } catch (error) {
-            console.error('Error al convertir imágenes:', error);
             alert('Error al generar el PDF.');
         } finally {
             setIsProcessing(false);

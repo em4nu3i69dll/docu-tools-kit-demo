@@ -45,7 +45,6 @@ export default function PdfToJpg() {
             setThumbnails(thumbs);
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al generar miniaturas:', error);
         } finally {
             setIsProcessing(false);
         }
@@ -101,7 +100,6 @@ export default function PdfToJpg() {
             });
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al convertir PDF:', error);
             alert('Error al convertir PDF a JPG');
         } finally {
             setIsProcessing(false);

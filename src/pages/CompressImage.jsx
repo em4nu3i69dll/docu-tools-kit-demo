@@ -67,7 +67,6 @@ export default function CompressImage() {
             }
             setImagenesComprimidas(resultados);
         } catch (error) {
-            console.error(error);
         } finally {
             setEstaComprimiendo(false);
         }

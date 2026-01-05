@@ -11,6 +11,7 @@ import RotateImage from './pages/RotateImage';
 import WatermarkImage from './pages/WatermarkImage';
 import EditorFotos from './pages/EditorFotos';
 import HtmlToImage from './pages/HtmlToImage';
+import RemoveBackground from './pages/RemoveBackground';
 import MergePdf from './pages/MergePdf';
 import SplitPdf from './pages/SplitPdf';
 import CompressPdf from './pages/CompressPdf';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/girar-imagen" element={<RotateImage />} />
             <Route path="/marca-agua" element={<WatermarkImage />} />
             <Route path="/html-a-imagen" element={<HtmlToImage />} />
+            <Route path="/remover-fondo" element={<RemoveBackground />} />
             <Route path="/unir-pdf" element={<MergePdf />} />
             <Route path="/dividir-pdf" element={<SplitPdf />} />
             <Route path="/comprimir-pdf" element={<CompressPdf />} />

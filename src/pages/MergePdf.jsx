@@ -117,7 +117,6 @@ export default function MergePdf() {
             setThumbnails(prev => ({ ...prev, [id]: url }));
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al generar miniatura:', error);
             setThumbnails(prev => ({ ...prev, [id]: 'error' }));
         }
     };

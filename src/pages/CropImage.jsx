@@ -59,7 +59,6 @@ export default function CropImage() {
                 name: image.name
             });
         } catch (e) {
-            console.error(e);
         }
         setIsProcessing(false);
     };

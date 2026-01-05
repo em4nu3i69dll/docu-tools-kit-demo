@@ -3,7 +3,7 @@ import ToolCard from '../components/ToolCard';
 import {
     Minimize2, Image, Scissors, FileType, RefreshCw,
     Type, Code, FileText, Combine, FileStack,
-    FileOutput, FileCheck, FileEdit
+    FileOutput, FileCheck, FileEdit, Wand2
 } from 'lucide-react';
 
 export default function Home() {
@@ -79,12 +79,20 @@ export default function Home() {
             icono: Code,
             hacia: '/html-a-imagen',
             color: '#facc15'
+        },
+        {
+            id: 10,
+            titulo: 'Remover Fondo',
+            descripcion: 'Elimina el fondo de tus imágenes automáticamente y descarga en PNG, JPG o WEBP.',
+            icono: Wand2,
+            hacia: '/remover-fondo',
+            color: '#8b5cf6'
         }
     ];
 
     const herramientasPdf = [
         {
-            id: 10,
+            id: 11,
             titulo: 'Unir PDF',
             descripcion: 'Une varios archivos PDF en un solo documento de forma fácil.',
             icono: Combine,
@@ -92,7 +100,7 @@ export default function Home() {
             color: '#ff4d4d'
         },
         {
-            id: 11,
+            id: 12,
             titulo: 'Dividir PDF',
             descripcion: 'Extrae páginas de tu PDF o guarda cada página como un PDF independiente.',
             icono: Scissors,
@@ -100,7 +108,7 @@ export default function Home() {
             color: '#ffa333'
         },
         {
-            id: 12,
+            id: 13,
             titulo: 'Comprimir PDF',
             descripcion: 'Reduce el tamaño de tus archivos PDF manteniendo la máxima calidad.',
             icono: Minimize2,
@@ -108,7 +116,7 @@ export default function Home() {
             color: '#ffcc00'
         },
         {
-            id: 13,
+            id: 14,
             titulo: 'PDF a Word',
             descripcion: 'Convierte tus documentos PDF a archivos DOCX editables con precisión.',
             icono: FileStack,
@@ -116,7 +124,7 @@ export default function Home() {
             color: '#4488ff'
         },
         {
-            id: 14,
+            id: 15,
             titulo: 'PDF a JPG',
             descripcion: 'Extrae todas las imágenes de un PDF o convierte cada página en una imagen JPG.',
             icono: FileOutput,
@@ -124,7 +132,7 @@ export default function Home() {
             color: '#ff33aa'
         },
         {
-            id: 15,
+            id: 16,
             titulo: 'JPG a PDF',
             descripcion: 'Convierte tus imágenes JPG a PDF en segundos y ajusta la orientación.',
             icono: FileCheck,
@@ -154,7 +162,7 @@ export default function Home() {
                 </p>
             </div>
 
-            <div style={{ marginBottom: '6rem' }}>
+            <div id="herramientas-imagen" style={{ marginBottom: '6rem', scrollMarginTop: '100px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}>
                     <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(96, 165, 250, 0.1)', color: '#60a5fa' }}>
                         <Image size={24} />
@@ -171,7 +179,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div>
+            <div id="herramientas-pdf" style={{ scrollMarginTop: '100px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}>
                     <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
                         <FileText size={24} />

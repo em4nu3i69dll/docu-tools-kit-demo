@@ -55,7 +55,6 @@ export default function SplitPdf() {
             setRanges([{ id: 1, start: 1, end: pdf.numPages }]);
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al generar miniaturas:', error);
         } finally {
             setIsProcessing(false);
         }
@@ -167,7 +166,6 @@ export default function SplitPdf() {
                 descargarArchivo(content, 'pdf-dividido-por-tamaño.zip');
             }
         } catch (error) {
-            console.error(error);
             alert('Error al procesar el PDF');
         } finally {
             setIsProcessing(false);

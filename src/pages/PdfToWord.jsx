@@ -40,7 +40,6 @@ export default function PdfToWord() {
 
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al generar miniatura:', error);
         } finally {
             setIsProcessing(false);
         }
@@ -94,7 +93,6 @@ export default function PdfToWord() {
 
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al convertir PDF:', error);
             alert('Error al convertir PDF a Word.');
         } finally {
             setIsProcessing(false);

@@ -43,7 +43,6 @@ export default function CompressPdf() {
 
             await pdf.destroy();
         } catch (error) {
-            console.error('Error al generar miniatura:', error);
         }
     };
 
@@ -86,7 +85,6 @@ export default function CompressPdf() {
                 blob: compressedBlob
             });
         } catch (error) {
-            console.error('Error al comprimir PDF:', error);
             alert('Error al comprimir el PDF.');
         } finally {
             setIsProcessing(false);

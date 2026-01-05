@@ -137,7 +137,6 @@ export default function HtmlToImage() {
                 setIsProcessing(false);
             }, 'image/png');
         } catch (error) {
-            console.error(error);
             setIsProcessing(false);
         }
     };
