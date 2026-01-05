@@ -12,6 +12,13 @@
 </div>
 
 ---
+## 📸 Fotos del proyecto
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ddb6a0c7-85e2-45be-b0c2-44425a43f0a0" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1d42aa33-bb34-4f35-b072-cd22c44b8455" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b59974ea-3b88-4056-bc7b-8736d323fe4b" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2c17f389-2671-46a6-bedf-27914bb4f542" />
+
 
 ## 📋 Descripción
 
