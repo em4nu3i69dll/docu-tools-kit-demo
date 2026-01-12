@@ -210,15 +210,6 @@ npm run preview
 - **Tema oscuro**: Interfaz optimizada para uso prolongado
 - **UX intuitiva**: Drag & drop, feedback visual, y controles claros
 
-## 🎨 Características de Diseño
-
-- **Interfaz moderna**: Diseño glassmorphism con efectos de vidrio
-- **Responsive**: Adaptable a todos los dispositivos (móvil, tablet, desktop)
-- **Animaciones fluidas**: Transiciones suaves con Framer Motion
-- **Tema oscuro**: Interfaz optimizada para uso prolongado
-- **UX intuitiva**: Drag & drop, feedback visual, y controles claros
-
-
 ## 📝 Licencia
 
 Este proyecto esta libre para que lo utilicen de la forma que mas les guste, son libres de modificarlo y subirlo las veces que quieran a donde ustedes quieran siempre y cuando den los creditos correspondientes.
