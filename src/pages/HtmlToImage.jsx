@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { descargarArchivo } from '../utils/download';
+import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
 import { Download, Code as CodeIcon, Image as ImageIcon, RefreshCw, Trash2, Move } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -115,6 +116,7 @@ export default function HtmlToImage() {
 
 </div>`);
     const [isProcessing, setIsProcessing] = useState(false);
+    const mensajeProcesamiento = useMensajesProcesamiento(isProcessing);
     const previewRef = useRef(null);
     const containerRef = useRef(null);
 
@@ -147,7 +149,16 @@ export default function HtmlToImage() {
 
     return (
         <div className="animar-aparecer" style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, minHeight: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, minHeight: 0, position: 'relative' }}>
+                {isProcessing && (
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 100 }}>
+                        <div className="anillo-cargador"></div>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>GENERANDO IMAGEN</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', minHeight: '1.5rem' }}>{mensajeProcesamiento}</p>
+                        </div>
+                    </div>
+                )}
                 <div style={{
                     borderRight: '1px solid var(--border-light)',
                     display: 'flex',
@@ -250,6 +261,17 @@ export default function HtmlToImage() {
             <style>{`
                 .girar { animation: girar 2s linear infinite; }
                 @keyframes girar { 100% { transform: rotate(360deg); } }
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
                 .barra-desplazamiento-personalizada::-webkit-scrollbar { height: 6px; width: 6px; }
                 .barra-desplazamiento-personalizada::-webkit-scrollbar-track { background: transparent; }
                 .barra-desplazamiento-personalizada::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }

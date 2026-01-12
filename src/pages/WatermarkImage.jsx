@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
+import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
 import JSZip from 'jszip';
 import {
     Upload, Type, Download, Trash2, Plus,
@@ -23,6 +25,7 @@ export default function WatermarkImage() {
     const [activeIdx, setActiveIdx] = useState(0);
     const [watermarkedImages, setWatermarkedImages] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
+    const mensajeProcesamiento = useMensajesProcesamiento(isProcessing);
 
     const [text, setText] = useState('MARCA DE AGUA');
     const [font, setFont] = useState(FONTS[0]);
@@ -61,6 +64,8 @@ export default function WatermarkImage() {
         onDrop,
         accept: { 'image/*': [] }
     });
+
+    usePasteFiles(onDrop, ['image/']);
 
     const activeImage = images[activeIdx];
 
@@ -177,23 +182,35 @@ export default function WatermarkImage() {
 
             {images.length === 0 ? (
                 <div {...getRootProps()} className="panel-vidrio" style={{
-                    borderRadius: '1.5rem',
-                    padding: '5rem 2rem',
+                    borderRadius: '2rem',
+                    padding: '6rem 2rem',
                     textAlign: 'center',
                     cursor: 'pointer',
                     maxWidth: '800px',
                     margin: '0 auto',
                     border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
-                    transition: 'all 0.3s'
+                    background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                    transition: 'all 0.3s ease'
                 }}>
                     <input {...getInputProps()} />
-                    <Upload size={60} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
-                    <h3 className="fuente-titulo" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Sube tus fotos para empezar</h3>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Puedes subir varias fotos a la vez</p>
-                    <button className="btn-principal">Elegir archivos</button>
+                    <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
+                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                        Arrastra y suelta o presiona Ctrl+V para pegar
+                    </p>
+                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivos</button>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', height: 'calc(100vh - 180px)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', height: 'calc(100vh - 180px)', position: 'relative' }}>
+                    {isProcessing && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 100, borderRadius: '1rem' }}>
+                            <div className="anillo-cargador"></div>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>APLICANDO MARCA DE AGUA</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', minHeight: '1.5rem' }}>{mensajeProcesamiento}</p>
+                            </div>
+                        </div>
+                    )}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
                         <div className="panel-vidrio" style={{
                             flex: 1,
@@ -408,6 +425,17 @@ export default function WatermarkImage() {
             <style>{`
                 .girar { animation: girar 2s linear infinite; }
                 @keyframes girar { 100% { transform: rotate(360deg); } }
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
                 .barra-desplazamiento-personalizada::-webkit-scrollbar { height: 6px; width: 6px; }
                 .barra-desplazamiento-personalizada::-webkit-scrollbar-track { background: transparent; }
                 .barra-desplazamiento-personalizada::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }

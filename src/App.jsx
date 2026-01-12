@@ -18,6 +18,8 @@ import CompressPdf from './pages/CompressPdf';
 import JpgToPdf from './pages/JpgToPdf';
 import PdfToJpg from './pages/PdfToJpg';
 import PdfToWord from './pages/PdfToWord';
+import Mp4ToGif from './pages/Mp4ToGif';
+import ConvertirVideo from './pages/ConvertirVideo';
 import './App.css';
 
 function App() {
@@ -44,6 +46,8 @@ function App() {
             <Route path="/jpg-a-pdf" element={<JpgToPdf />} />
             <Route path="/pdf-a-jpg" element={<PdfToJpg />} />
             <Route path="/pdf-a-word" element={<PdfToWord />} />
+            <Route path="/mp4-a-gif" element={<Mp4ToGif />} />
+            <Route path="/convertir-video" element={<ConvertirVideo />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </main>

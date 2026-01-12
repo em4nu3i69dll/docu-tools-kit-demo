@@ -3,7 +3,7 @@ import ToolCard from '../components/ToolCard';
 import {
     Minimize2, Image, Scissors, FileType, RefreshCw,
     Type, Code, FileText, Combine, FileStack,
-    FileOutput, FileCheck, FileEdit, Wand2
+    FileOutput, FileCheck, FileEdit, Wand2, Video, FileVideo
 } from 'lucide-react';
 
 export default function Home() {
@@ -141,6 +141,25 @@ export default function Home() {
         }
     ];
 
+    const herramientasVideo = [
+        {
+            id: 17,
+            titulo: 'MP4 a GIF',
+            descripcion: 'Convierte tus videos MP4 en GIFs animados de alta calidad.',
+            icono: Video,
+            hacia: '/mp4-a-gif',
+            color: '#ec4899'
+        },
+        {
+            id: 18,
+            titulo: 'Convertir Video',
+            descripcion: 'Convierte cualquier formato de video a otro formato compatible.',
+            icono: FileVideo,
+            hacia: '/convertir-video',
+            color: '#8b5cf6'
+        }
+    ];
+
     return (
         <div className="contenedor" style={{ paddingBottom: '8rem' }}>
             <div style={{ textAlign: 'center', marginBottom: '8rem', paddingTop: '6rem' }}>
@@ -191,6 +210,23 @@ export default function Home() {
                 </div>
                 <div className="grilla" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '2rem' }}>
                     {herramientasPdf.map(herramienta => (
+                        <ToolCard key={herramienta.id} {...herramienta} />
+                    ))}
+                </div>
+            </div>
+
+            <div id="herramientas-video" style={{ scrollMarginTop: '100px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}>
+                    <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899' }}>
+                        <Video size={24} />
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '600', marginBottom: '0.25rem' }}>Herramientas de Video</h2>
+                        <p style={{ color: '#71717a' }}>Convierte y edita tus videos con herramientas profesionales.</p>
+                    </div>
+                </div>
+                <div className="grilla" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '2rem' }}>
+                    {herramientasVideo.map(herramienta => (
                         <ToolCard key={herramienta.id} {...herramienta} />
                     ))}
                 </div>

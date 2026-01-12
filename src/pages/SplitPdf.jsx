@@ -4,6 +4,8 @@ import { PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { motion, AnimatePresence } from 'framer-motion';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
+import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
 import JSZip from 'jszip';
 import {
     FileText, Scissors, AlertCircle, ArrowRight,
@@ -16,6 +18,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/b
 export default function SplitPdf() {
     const [pdfFile, setPdfFile] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const mensajeProcesamiento = useMensajesProcesamiento(isProcessing);
     const [thumbnails, setThumbnails] = useState([]);
     const [totalPages, setTotalPages] = useState(0);
     const [mode, setMode] = useState('ranges');
@@ -74,6 +77,12 @@ export default function SplitPdf() {
         multiple: false,
         noClick: pdfFile !== null
     });
+
+    usePasteFiles((archivos) => {
+        if (archivos.length > 0 && !pdfFile) {
+            onDrop(archivos);
+        }
+    }, ['application/pdf']);
 
     const addRange = () => {
         const lastRange = ranges[ranges.length - 1];
@@ -178,20 +187,30 @@ export default function SplitPdf() {
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
                     <div {...getRootProps()} className="panel-vidrio" style={{
                         width: '100%', maxWidth: '800px', padding: '6rem 2rem', textAlign: 'center', borderRadius: '2rem', cursor: 'pointer',
-                        border: isDragActive ? '2px dashed #ff4d4d' : '1px solid var(--border-light)',
-                        background: isDragActive ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255, 255, 255, 0.02)'
+                        border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
+                        background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                        transition: 'all 0.3s ease'
                     }}>
                         <input {...getInputProps()} />
-                        <div style={{ width: '80px', height: '80px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
-                            <Scissors size={40} color="#ff4d4d" />
-                        </div>
-                        <h2 className="fuente-titulo" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Dividir PDF</h2>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Elegí cómo querés separar tu documento</p>
-                        <button className="btn-principal" style={{ background: '#ff4d4d', padding: '1rem 3rem' }}>Seleccionar Archivo</button>
+                        <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
+                        <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar archivo PDF</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                            Arrastra y suelta o presiona Ctrl+V para pegar
+                        </p>
+                        <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivo</button>
                     </div>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', flex: 1, minHeight: 0 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', flex: 1, minHeight: 0, position: 'relative' }}>
+                    {isProcessing && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 100 }}>
+                            <div className="anillo-cargador"></div>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>DIVIDIENDO PDF</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', minHeight: '1.5rem' }}>{mensajeProcesamiento}</p>
+                            </div>
+                        </div>
+                    )}
                     <div style={{ padding: '3rem', overflowY: 'auto', background: 'rgba(0,0,0,0.1)' }} className="barra-desplazamiento-personalizada">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -335,7 +354,23 @@ export default function SplitPdf() {
                     </div>
                 </div>
             )}
-            <style>{`.girar { animation: girar 2s linear infinite; } @keyframes girar { 100% { transform: rotate(360deg); } } .barra-desplazamiento-personalizada::-webkit-scrollbar { width: 6px; } .barra-desplazamiento-personalizada::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }`}</style>
+            <style>{`
+                .girar { animation: girar 2s linear infinite; }
+                @keyframes girar { 100% { transform: rotate(360deg); } }
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
+                .barra-desplazamiento-personalizada::-webkit-scrollbar { width: 6px; }
+                .barra-desplazamiento-personalizada::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+            `}</style>
         </div>
     );
 }

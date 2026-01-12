@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
+import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
 import JSZip from 'jszip';
 import {
     Upload, Download, X, RefreshCw,
@@ -19,6 +21,8 @@ export default function CompressImage() {
     const [anchoMaximo, setAnchoMaximo] = useState(1920);
     const [tamanoMaximoMB, setTamanoMaximoMB] = useState(1);
     const [usarWorker, setUsarWorker] = useState(true);
+
+    const mensajeProcesamiento = useMensajesProcesamiento(estaComprimiendo);
 
     const alSoltar = useCallback((archivosAceptados) => {
         const nuevasImagenes = archivosAceptados.map(archivo => ({
@@ -38,6 +42,8 @@ export default function CompressImage() {
             'image/webp': []
         }
     });
+
+    usePasteFiles(alSoltar, ['image/jpeg', 'image/png', 'image/webp']);
 
     const eliminarImagen = (id) => {
         setImagenes(prev => prev.filter(imagen => imagen.id !== id));
@@ -106,7 +112,7 @@ export default function CompressImage() {
             </div>
 
             {imagenes.length === 0 ? (
-                <div {...getRootProps()} className="panel-vidrio escalar-arriba" style={{
+                <div {...getRootProps()} className="panel-vidrio" style={{
                     borderRadius: '2rem',
                     padding: '6rem 2rem',
                     textAlign: 'center',
@@ -114,19 +120,28 @@ export default function CompressImage() {
                     maxWidth: '800px',
                     margin: '0 auto',
                     border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
-                    background: isDragActive ? 'rgba(99, 102, 241, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                    background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
                     transition: 'all 0.3s ease'
                 }}>
                     <input {...getInputProps()} />
                     <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
-                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Suelte sus imágenes aquí</h3>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', maxWidth: '400px', margin: '0 auto 2.5rem' }}>
-                        Soporta formatos JPG, PNG y WebP. La compresión se realiza localmente en tu navegador para máxima privacidad.
+                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                        Arrastra y suelta o presiona Ctrl+V para pegar
                     </p>
-                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir Archivos</button>
+                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivos</button>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start', position: 'relative' }}>
+                    {estaComprimiendo && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 100, borderRadius: '1rem' }}>
+                            <div className="anillo-cargador"></div>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>COMPRIMIENDO IMÁGENES</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', minHeight: '1.5rem' }}>{mensajeProcesamiento}</p>
+                            </div>
+                        </div>
+                    )}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div className="panel-vidrio" style={{ padding: '1rem', borderRadius: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -312,6 +327,17 @@ export default function CompressImage() {
             <style>{`
                 .girar { animation: girar 2s linear infinite; }
                 @keyframes girar { 100% { transform: rotate(360deg); } }
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
                 .elemento-hover { transition: transform 0.2s ease, background 0.2s ease; }
                 .elemento-hover:hover { transform: translateX(5px); background: rgba(255,255,255,0.05); }
                 .icono-btn-peligro { background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; padding: 0.6rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; }

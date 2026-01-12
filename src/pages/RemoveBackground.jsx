@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
 import { removeBackground } from '@imgly/background-removal';
 import JSZip from 'jszip';
 import {
@@ -36,6 +37,8 @@ export default function RemoveBackground() {
         multiple: true,
         maxFiles: 20
     });
+
+    usePasteFiles(alSoltar, ['image/jpeg', 'image/png', 'image/webp']);
 
 
     const removerFondo = async (imagenId) => {
@@ -215,15 +218,11 @@ export default function RemoveBackground() {
                 >
                     <input {...getInputProps()} />
                     <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
-                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>
-                        Suelte sus imágenes aquí
-                    </h3>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', maxWidth: '400px', margin: '0 auto 2.5rem' }}>
-                        Soporta formatos JPG, PNG y WebP. Máximo 20 imágenes. El procesamiento se realiza localmente en tu navegador para máxima privacidad.
+                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                        Arrastra y suelta o presiona Ctrl+V para pegar
                     </p>
-                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>
-                        Elegir Archivos
-                    </button>
+                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivos</button>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>

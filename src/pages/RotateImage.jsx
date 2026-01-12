@@ -1,96 +1,99 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
 import JSZip from 'jszip';
 import { Upload, RotateCw, Trash2, Download, Plus, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function RotateImage() {
-    const [images, setImages] = useState([]);
-    const [rotatedImages, setRotatedImages] = useState([]);
-    const [rotation, setRotation] = useState(0);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [imagenes, setImagenes] = useState([]);
+    const [imagenesRotadas, setImagenesRotadas] = useState([]);
+    const [rotacion, setRotacion] = useState(0);
+    const [estaProcesando, setEstaProcesando] = useState(false);
 
-    const onDrop = useCallback((acceptedFiles) => {
-        acceptedFiles.forEach(file => {
-            setImages(prev => [...prev, {
-                file,
+    const alSoltar = useCallback((archivosAceptados) => {
+        archivosAceptados.forEach(archivo => {
+            setImagenes(prev => [...prev, {
+                file: archivo,
                 id: Math.random().toString(36).substr(2, 9),
-                preview: URL.createObjectURL(file)
+                preview: URL.createObjectURL(archivo)
             }]);
         });
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
+        onDrop: alSoltar,
         accept: { 'image/*': [] },
     });
 
-    const rotateImage = (img, degrees) => {
-        return new Promise((resolve) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const image = new Image();
-            image.src = img.preview;
+    usePasteFiles(alSoltar, ['image/']);
 
-            image.onload = () => {
-                const rad = (degrees * Math.PI) / 180;
-                const sin = Math.abs(Math.sin(rad));
-                const cos = Math.abs(Math.cos(rad));
+    const girarImagen = (imagen, grados) => {
+        return new Promise((resolver) => {
+            const lienzo = document.createElement('canvas');
+            const contexto = lienzo.getContext('2d');
+            const objetoImagen = new Image();
+            objetoImagen.src = imagen.preview;
 
-                const width = image.width;
-                const height = image.height;
+            objetoImagen.onload = () => {
+                const radianes = (grados * Math.PI) / 180;
+                const seno = Math.abs(Math.sin(radianes));
+                const coseno = Math.abs(Math.cos(radianes));
 
-                canvas.width = width * cos + height * sin;
-                canvas.height = width * sin + height * cos;
+                const ancho = objetoImagen.width;
+                const alto = objetoImagen.height;
 
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(rad);
-                ctx.drawImage(image, -width / 2, -height / 2);
+                lienzo.width = ancho * coseno + alto * seno;
+                lienzo.height = ancho * seno + alto * coseno;
 
-                canvas.toBlob((blob) => {
-                    resolve({
-                        id: img.id,
-                        originalName: img.file.name,
-                        rotatedBlob: blob
+                contexto.translate(lienzo.width / 2, lienzo.height / 2);
+                contexto.rotate(radianes);
+                contexto.drawImage(objetoImagen, -ancho / 2, -alto / 2);
+
+                lienzo.toBlob((blob) => {
+                    resolver({
+                        id: imagen.id,
+                        nombreOriginal: imagen.file.name,
+                        blobRotado: blob
                     });
-                }, img.file.type);
+                }, imagen.file.type);
             };
         });
     };
 
-    const handleProcess = async () => {
-        setIsProcessing(true);
-        const results = [];
-        for (const img of images) {
-            const result = await rotateImage(img, rotation);
-            results.push(result);
+    const manejarProcesar = async () => {
+        setEstaProcesando(true);
+        const resultados = [];
+        for (const imagen of imagenes) {
+            const resultado = await girarImagen(imagen, rotacion);
+            resultados.push(resultado);
         }
-        setRotatedImages(results);
-        setIsProcessing(false);
+        setImagenesRotadas(resultados);
+        setEstaProcesando(false);
     };
 
-    const downloadAll = async () => {
-        if (rotatedImages.length === 1) {
-            descargarArchivo(rotatedImages[0].rotatedBlob, rotatedImages[0].originalName);
+    const descargarTodo = async () => {
+        if (imagenesRotadas.length === 1) {
+            descargarArchivo(imagenesRotadas[0].blobRotado, imagenesRotadas[0].nombreOriginal);
         } else {
             const zip = new JSZip();
-            rotatedImages.forEach(res => {
-                zip.file(`eimage-rotada_${res.originalName}`, res.rotatedBlob);
+            imagenesRotadas.forEach(resultado => {
+                zip.file(`eimage-rotada_${resultado.nombreOriginal}`, resultado.blobRotado);
             });
-            const content = await zip.generateAsync({ type: "blob" });
-            descargarArchivo(content, "imagenes_rotadas.zip");
+            const contenido = await zip.generateAsync({ type: "blob" });
+            descargarArchivo(contenido, "imagenes_rotadas.zip");
         }
     };
 
-    const rotateRight = () => {
-        setRotation(prev => (prev + 90) % 360);
+    const girarDerecha = () => {
+        setRotacion(prev => (prev + 90) % 360);
     }
 
-    const reset = () => {
-        setImages([]);
-        setRotatedImages([]);
-        setRotation(0);
+    const reiniciar = () => {
+        setImagenes([]);
+        setImagenesRotadas([]);
+        setRotacion(0);
     };
 
     return (
@@ -100,30 +103,31 @@ export default function RotateImage() {
                 <p style={{ color: 'var(--text-muted)' }}>Rota tus imágenes 90 grados, horario o antihorario.</p>
             </div>
 
-            {images.length === 0 ? (
+            {imagenes.length === 0 ? (
                 <div {...getRootProps()} className="panel-vidrio" style={{
-                    borderRadius: '1.5rem',
-                    padding: '4rem',
+                    borderRadius: '2rem',
+                    padding: '6rem 2rem',
                     textAlign: 'center',
                     cursor: 'pointer',
                     maxWidth: '800px',
                     margin: '0 auto',
-                    transition: 'all 0.3s ease',
-                    border: isDragActive ? '1px solid #8b5cf6' : '1px solid var(--border-light)',
-                    boxShadow: isDragActive ? '0 0 20px rgba(139, 92, 246, 0.2)' : 'none'
+                    border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
+                    background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                    transition: 'all 0.3s ease'
                 }}>
                     <input {...getInputProps()} />
-                    <Upload size={64} style={{ marginBottom: '1.5rem', color: isDragActive ? '#8b5cf6' : 'var(--text-muted)' }} />
-                    <h3 className="fuente-titulo" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
-                    <button className="btn-principal">
-                        Elegir imágenes
-                    </button>
+                    <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
+                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                        Arrastra y suelta o presiona Ctrl+V para pegar
+                    </p>
+                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivos</button>
                 </div>
             ) : (
-                <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: rotatedImages.length > 0 ? '1fr' : '2fr 1fr', gap: '2rem' }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: imagenesRotadas.length > 0 ? '1fr' : '2fr 1fr', gap: '2rem' }}>
                     <div className="panel-vidrio" style={{ padding: '1.5rem', borderRadius: '1rem' }}>
                         <h3 className="fuente-titulo" style={{ marginTop: 0, marginBottom: '1rem' }}>
-                            {rotatedImages.length === 0 ? 'Vista previa' : 'Imágenes giradas'}
+                            {imagenesRotadas.length === 0 ? 'Vista previa' : 'Imágenes giradas'}
                         </h3>
 
                         <div style={{
@@ -135,9 +139,9 @@ export default function RotateImage() {
                             padding: '0.5rem'
                         }} className="barra-desplazamiento-personalizada">
                             <AnimatePresence>
-                                {(rotatedImages.length > 0 ? rotatedImages : images).map(img => (
+                                {(imagenesRotadas.length > 0 ? imagenesRotadas : imagenes).map(imagen => (
                                     <motion.div
-                                        key={img.id}
+                                        key={imagen.id}
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         className="panel-vidrio"
@@ -153,16 +157,16 @@ export default function RotateImage() {
                                     >
                                         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
                                             <motion.img
-                                                src={img.rotatedBlob ? URL.createObjectURL(img.rotatedBlob) : img.preview}
-                                                animate={{ rotate: rotatedImages.length > 0 ? 0 : rotation }}
+                                                src={imagen.blobRotado ? URL.createObjectURL(imagen.blobRotado) : imagen.preview}
+                                                animate={{ rotate: imagenesRotadas.length > 0 ? 0 : rotacion }}
                                                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                                                 style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                             />
                                         </div>
 
-                                        {rotatedImages.length > 0 ? (
+                                        {imagenesRotadas.length > 0 ? (
                                             <button
-                                                onClick={() => descargarArchivo(img.rotatedBlob, img.originalName)}
+                                                onClick={() => descargarArchivo(imagen.blobRotado, imagen.nombreOriginal)}
                                                 style={{
                                                     width: '100%',
                                                     padding: '0.5rem',
@@ -180,7 +184,7 @@ export default function RotateImage() {
                                                 <Download size={14} /> Descargar
                                             </button>
                                         ) : (
-                                            <button onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '6px', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <button onClick={() => setImagenes(prev => prev.filter(i => i.id !== imagen.id))} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '6px', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Trash2 size={16} />
                                             </button>
                                         )}
@@ -191,31 +195,31 @@ export default function RotateImage() {
                     </div>
 
                     <div className="panel-vidrio" style={{ padding: '1.5rem', borderRadius: '1rem', height: 'fit-content' }}>
-                        {rotatedImages.length === 0 ? (
+                        {imagenesRotadas.length === 0 ? (
                             <>
                                 <h3 className="fuente-titulo" style={{ marginTop: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <RotateCw size={20} /> Opciones de Giro
                                 </h3>
 
-                                <button onClick={rotateRight} className="btn-secundario" style={{ width: '100%', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1rem' }}>
+                                <button onClick={girarDerecha} className="btn-secundario" style={{ width: '100%', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1rem' }}>
                                     <RotateCw size={24} color="#8b5cf6" />
                                     <span style={{ fontWeight: 600 }}>Girar +90°</span>
                                 </button>
 
                                 <button
                                     className="btn-principal"
-                                    onClick={handleProcess}
-                                    disabled={isProcessing}
+                                    onClick={manejarProcesar}
+                                    disabled={estaProcesando}
                                     style={{
                                         width: '100%',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.5rem',
-                                        opacity: isProcessing ? 0.7 : 1
+                                        opacity: estaProcesando ? 0.7 : 1
                                     }}
                                 >
-                                    {isProcessing ? 'Procesando...' : 'Aplicar Giro'}
+                                    {estaProcesando ? 'Procesando...' : 'Aplicar Giro'}
                                 </button>
 
                                 <button {...getRootProps()} className="btn-secundario" style={{ width: '100%', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -231,14 +235,14 @@ export default function RotateImage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     <button
                                         className="btn-principal"
-                                        onClick={downloadAll}
+                                        onClick={descargarTodo}
                                         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                     >
                                         <Download size={20} /> Descargar todas
                                     </button>
                                     <button
                                         className="btn-secundario"
-                                        onClick={reset}
+                                        onClick={reiniciar}
                                         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                     >
                                         <Plus size={18} /> Girar otras imágenes
@@ -249,6 +253,20 @@ export default function RotateImage() {
                     </div>
                 </div>
             )}
+
+            <style>{`
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }

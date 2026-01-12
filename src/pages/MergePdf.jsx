@@ -4,6 +4,8 @@ import { PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Reorder, motion, AnimatePresence } from 'framer-motion';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
+import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
 import {
     FileText, Plus, GripVertical, Trash2,
     Download, RefreshCw, AlertCircle,
@@ -12,11 +14,11 @@ import {
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
 
-const PDFCard = memo(({ file, thumbnail, onRemove }) => {
+const TarjetaPdf = memo(({ archivo, miniatura, alEliminar }) => {
     return (
         <Reorder.Item
-            value={file}
-            id={file.id}
+            value={archivo}
+            id={archivo.id}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -50,8 +52,8 @@ const PDFCard = memo(({ file, thumbnail, onRemove }) => {
                     position: 'relative',
                     boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
                 }}>
-                    {thumbnail ? (
-                        <img src={thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    {miniatura ? (
+                        <img src={miniatura} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                             <RefreshCw className="girar" size={24} color="#ff4d4d" />
@@ -69,14 +71,14 @@ const PDFCard = memo(({ file, thumbnail, onRemove }) => {
                 </div>
 
                 <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '0.2rem' }}>
-                    {file.name}
+                    {archivo.name}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    {(file.size / 1024).toFixed(1)} KB
+                    {(archivo.size / 1024).toFixed(1)} KB
                 </div>
 
                 <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemove(file.id); }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); alEliminar(archivo.id); }}
                     style={{
                         position: 'absolute', top: '-8px', right: '-8px',
                         background: '#ef4444', border: 'none', color: 'white',
@@ -93,88 +95,101 @@ const PDFCard = memo(({ file, thumbnail, onRemove }) => {
 });
 
 export default function MergePdf() {
-    const [files, setFiles] = useState([]);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [thumbnails, setThumbnails] = useState({});
+    const [archivos, setArchivos] = useState([]);
+    const [estaProcesando, setEstaProcesando] = useState(false);
+    const mensajeProcesamiento = useMensajesProcesamiento(estaProcesando);
+    const [miniaturas, setMiniaturas] = useState({});
 
-    const generateThumbnail = async (file, id) => {
+    const generarMiniatura = async (archivo, id) => {
         try {
-            const arrayBuffer = await file.arrayBuffer();
-            const loadingTask = pdfjsLib.getDocument({
-                data: arrayBuffer,
+            const bufferArray = await archivo.arrayBuffer();
+            const tareaCarga = pdfjsLib.getDocument({
+                data: bufferArray,
                 disableFontFace: true,
                 verbosity: 0
             });
-            const pdf = await loadingTask.promise;
-            const page = await pdf.getPage(1);
-            const viewport = page.getViewport({ scale: 0.4 });
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            await page.render({ canvasContext: context, viewport }).promise;
-            const url = canvas.toDataURL();
-            setThumbnails(prev => ({ ...prev, [id]: url }));
+            const pdf = await tareaCarga.promise;
+            const pagina = await pdf.getPage(1);
+            const viewport = pagina.getViewport({ scale: 0.4 });
+            const lienzo = document.createElement('canvas');
+            const contexto = lienzo.getContext('2d');
+            lienzo.height = viewport.height;
+            lienzo.width = viewport.width;
+            await pagina.render({ canvasContext: contexto, viewport }).promise;
+            const url = lienzo.toDataURL();
+            setMiniaturas(prev => ({ ...prev, [id]: url }));
             await pdf.destroy();
         } catch (error) {
-            setThumbnails(prev => ({ ...prev, [id]: 'error' }));
+            setMiniaturas(prev => ({ ...prev, [id]: 'error' }));
         }
     };
 
-    const onDrop = useCallback((acceptedFiles) => {
-        const newFiles = acceptedFiles.map(file => {
+    const alSoltar = useCallback((archivosAceptados) => {
+        const nuevosArchivos = archivosAceptados.map(archivo => {
             const id = Math.random().toString(36).substr(2, 9);
-            generateThumbnail(file, id);
-            return { file, id, name: file.name, size: file.size };
+            generarMiniatura(archivo, id);
+            return { file: archivo, id, name: archivo.name, size: archivo.size };
         });
-        setFiles(prev => [...prev, ...newFiles]);
+        setArchivos(prev => [...prev, ...nuevosArchivos]);
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
+        onDrop: alSoltar,
         accept: { 'application/pdf': [] }
     });
 
-    const handleMerge = async () => {
-        if (files.length < 2) return;
-        setIsProcessing(true);
+    usePasteFiles(alSoltar, ['application/pdf']);
+
+    const manejarUnir = async () => {
+        if (archivos.length < 2) return;
+        setEstaProcesando(true);
         try {
-            const mergedPdf = await PDFDocument.create();
-            for (const fileObj of files) {
-                const arrayBuffer = await fileObj.file.arrayBuffer();
-                const pdf = await PDFDocument.load(arrayBuffer);
-                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-                copiedPages.forEach(p => mergedPdf.addPage(p));
+            const pdfUnido = await PDFDocument.create();
+            for (const objetoArchivo of archivos) {
+                const bufferArray = await objetoArchivo.file.arrayBuffer();
+                const pdf = await PDFDocument.load(bufferArray);
+                const paginasCopiadas = await pdfUnido.copyPages(pdf, pdf.getPageIndices());
+                paginasCopiadas.forEach(pagina => pdfUnido.addPage(pagina));
             }
-            const pdfBytes = await mergedPdf.save();
-            descargarArchivo(new Blob([pdfBytes], { type: 'application/pdf' }), 'unido-etools.pdf');
+            const bytesPdf = await pdfUnido.save();
+            descargarArchivo(new Blob([bytesPdf], { type: 'application/pdf' }), 'unido-etools.pdf');
         } catch (error) {
             alert('Error al unir los archivos.');
         } finally {
-            setIsProcessing(false);
+            setEstaProcesando(false);
         }
     };
 
     return (
         <div className="animar-aparecer" style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
-            {files.length === 0 ? (
+            {archivos.length === 0 ? (
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
                     <div {...getRootProps()} className="panel-vidrio" style={{
                         width: '100%', maxWidth: '800px', padding: '6rem 2rem', textAlign: 'center', borderRadius: '2rem', cursor: 'pointer',
-                        border: isDragActive ? '2px dashed #ff4d4d' : '1px solid var(--border-light)',
-                        background: isDragActive ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255, 255, 255, 0.02)'
+                        border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
+                        background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                        transition: 'all 0.3s ease'
                     }}>
                         <input {...getInputProps()} />
-                        <div style={{ width: '80px', height: '80px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
-                            <FileText size={40} color="#ff4d4d" />
-                        </div>
-                        <h2 className="fuente-titulo" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Unir PDF</h2>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Selecciona varios archivos PDF para unirlos</p>
-                        <button className="btn-principal" style={{ background: '#ff4d4d', padding: '1rem 3rem' }}>Seleccionar Archivos</button>
+                        <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
+                        <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar archivos PDF</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                            Arrastra y suelta o presiona Ctrl+V para pegar
+                        </p>
+                        <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivos</button>
                     </div>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', flex: 1, minHeight: 0 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', flex: 1, minHeight: 0, position: 'relative' }}>
+                    {estaProcesando && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 100 }}>
+                            <div className="anillo-cargador"></div>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>UNIENDO PDF</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', minHeight: '1.5rem' }}>{mensajeProcesamiento}</p>
+                            </div>
+                        </div>
+                    )}
                     <div style={{ padding: '3rem', overflowY: 'auto', background: 'rgba(0,0,0,0.1)' }} className="barra-desplazamiento-personalizada">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                             <h3 className="fuente-titulo" style={{ fontSize: '1.5rem', margin: 0 }}>Tus Archivos PDF</h3>
@@ -186,8 +201,8 @@ export default function MergePdf() {
 
                         <Reorder.Group
                             axis="x"
-                            values={files}
-                            onReorder={setFiles}
+                            values={archivos}
+                            onReorder={setArchivos}
                             style={{
                                 display: 'flex',
                                 flexWrap: 'wrap',
@@ -197,12 +212,12 @@ export default function MergePdf() {
                             }}
                         >
                             <AnimatePresence>
-                                {files.map((file) => (
-                                    <PDFCard
-                                        key={file.id}
-                                        file={file}
-                                        thumbnail={thumbnails[file.id]}
-                                        onRemove={(id) => setFiles(f => f.filter(x => x.id !== id))}
+                                {archivos.map((archivo) => (
+                                    <TarjetaPdf
+                                        key={archivo.id}
+                                        archivo={archivo}
+                                        miniatura={miniaturas[archivo.id]}
+                                        alEliminar={(id) => setArchivos(f => f.filter(x => x.id !== id))}
                                     />
                                 ))}
                             </AnimatePresence>
@@ -221,26 +236,40 @@ export default function MergePdf() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                                     <span style={{ color: 'var(--text-muted)' }}>Archivos:</span>
-                                    <span style={{ fontWeight: 600 }}>{files.length}</span>
+                                    <span style={{ fontWeight: 600 }}>{archivos.length}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                                     <span style={{ color: 'var(--text-muted)' }}>Peso:</span>
-                                    <span style={{ fontWeight: 600 }}>{(files.reduce((a, b) => a + b.size, 0) / 1024 / 1024).toFixed(2)} MB</span>
+                                    <span style={{ fontWeight: 600 }}>{(archivos.reduce((a, b) => a + b.size, 0) / 1024 / 1024).toFixed(2)} MB</span>
                                 </div>
                             </div>
                         </div>
                         <button
                             className="btn-principal"
-                            disabled={files.length < 2 || isProcessing}
-                            onClick={handleMerge}
+                            disabled={archivos.length < 2 || estaProcesando}
+                            onClick={manejarUnir}
                             style={{ width: '100%', padding: '1.25rem', background: '#ff4d4d', fontSize: '1.1rem', fontWeight: 'bold' }}
                         >
-                            {isProcessing ? <RefreshCw className="girar" size={20} /> : <>Unir PDF <ArrowRight size={20} /></>}
+                            {estaProcesando ? <RefreshCw className="girar" size={20} /> : <>Unir PDF <ArrowRight size={20} /></>}
                         </button>
                     </div>
                 </div>
             )}
-            <style>{`.girar { animation: girar 2s linear infinite; } @keyframes girar { 100% { transform: rotate(360deg); } }`}</style>
+            <style>{`
+                .girar { animation: girar 2s linear infinite; }
+                @keyframes girar { 100% { transform: rotate(360deg); } }
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }

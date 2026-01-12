@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
     FileText, Minimize2, Image, Scissors, FileType, RefreshCw,
-    Type, Code, Wand2, Combine, FileStack, FileOutput, FileCheck, ChevronDown
+    Type, Code, Wand2, Combine, FileStack, FileOutput, FileCheck, ChevronDown, Video, FileVideo
 } from 'lucide-react';
 import './Header.css';
 
@@ -10,6 +10,10 @@ export default function Header() {
     const [menuAbierto, setMenuAbierto] = useState(null);
     const ubicacion = useLocation();
     const navegar = useNavigate();
+    const menuImagenRef = useRef(null);
+    const menuPdfRef = useRef(null);
+    const menuVideoRef = useRef(null);
+    const timeoutRef = useRef(null);
 
     const irASeccion = (seccion) => {
         if (ubicacion.pathname !== '/') {
@@ -51,8 +55,59 @@ export default function Header() {
         { titulo: 'Comprimir PDF', ruta: '/comprimir-pdf', icono: Minimize2, color: '#ffcc00' }
     ];
 
+    const herramientasVideo = [
+        { titulo: 'MP4 a GIF', ruta: '/mp4-a-gif', icono: Video, color: '#ec4899' },
+        { titulo: 'Convertir Video', ruta: '/convertir-video', icono: FileVideo, color: '#8b5cf6' }
+    ];
+
     const esRutaImagen = herramientasImagen.some(h => h.ruta === ubicacion.pathname) || ubicacion.pathname === '/';
     const esRutaPdf = herramientasPdf.some(h => h.ruta === ubicacion.pathname);
+    const esRutaVideo = herramientasVideo.some(h => h.ruta === ubicacion.pathname);
+
+    useEffect(() => {
+        const ajustarMenu = (menuRef) => {
+            if (!menuRef.current || menuAbierto === null) return;
+            
+            const menu = menuRef.current.querySelector('.menu-desplegable');
+            if (!menu) return;
+
+            const rect = menu.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const padding = 16;
+
+            if (rect.right > viewportWidth - padding) {
+                const overflow = rect.right - (viewportWidth - padding);
+                menu.style.transform = `translateX(-${overflow}px)`;
+            } else if (rect.left < padding) {
+                const overflow = padding - rect.left;
+                menu.style.transform = `translateX(${overflow}px)`;
+            } else {
+                menu.style.transform = 'translateX(0)';
+            }
+        };
+
+        if (menuAbierto === 'imagenes') {
+            ajustarMenu(menuImagenRef);
+        } else if (menuAbierto === 'pdf') {
+            ajustarMenu(menuPdfRef);
+        } else if (menuAbierto === 'video') {
+            ajustarMenu(menuVideoRef);
+        }
+    }, [menuAbierto]);
+
+    const manejarMouseEnter = (tipo) => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+        setMenuAbierto(tipo);
+    };
+
+    const manejarMouseLeave = () => {
+        timeoutRef.current = setTimeout(() => {
+            setMenuAbierto(null);
+        }, 200);
+    };
 
     return (
         <header className="encabezado panel-vidrio">
@@ -66,9 +121,10 @@ export default function Header() {
 
                 <nav className="navegacion">
                     <div
+                        ref={menuImagenRef}
                         className="contenedor-menu-desplegable"
-                        onMouseEnter={() => setMenuAbierto('imagenes')}
-                        onMouseLeave={() => setMenuAbierto(null)}
+                        onMouseEnter={() => manejarMouseEnter('imagenes')}
+                        onMouseLeave={manejarMouseLeave}
                     >
                         <div
                             onClick={() => irASeccion('herramientas-imagen')}
@@ -160,9 +216,10 @@ export default function Header() {
                     </div>
 
                     <div
+                        ref={menuPdfRef}
                         className="contenedor-menu-desplegable"
-                        onMouseEnter={() => setMenuAbierto('pdf')}
-                        onMouseLeave={() => setMenuAbierto(null)}
+                        onMouseEnter={() => manejarMouseEnter('pdf')}
+                        onMouseLeave={manejarMouseLeave}
                     >
                         <div
                             onClick={() => irASeccion('herramientas-pdf')}
@@ -214,6 +271,44 @@ export default function Header() {
                                 <div className="columna-menu">
                                     <h4 className="titulo-columna">EDITAR PDF</h4>
                                     {herramientasPdf.filter(h => ['Unir PDF', 'Dividir PDF', 'Comprimir PDF'].includes(h.titulo)).map(herramienta => {
+                                        const Icono = herramienta.icono;
+                                        return (
+                                            <Link
+                                                key={herramienta.ruta}
+                                                to={herramienta.ruta}
+                                                className="opcion-menu"
+                                                onClick={() => setMenuAbierto(null)}
+                                            >
+                                                <div className="contenedor-icono-menu" style={{ background: `${herramienta.color}15`, borderColor: `${herramienta.color}30` }}>
+                                                    <Icono size={18} color={herramienta.color} strokeWidth={1.5} />
+                                                </div>
+                                                <span>{herramienta.titulo}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div
+                        ref={menuVideoRef}
+                        className="contenedor-menu-desplegable"
+                        onMouseEnter={() => manejarMouseEnter('video')}
+                        onMouseLeave={manejarMouseLeave}
+                    >
+                        <div
+                            onClick={() => irASeccion('herramientas-video')}
+                            className={`enlace-navegacion ${esRutaVideo ? 'activo' : ''}`}
+                        >
+                            <span>HERRAMIENTAS DE VIDEO</span>
+                            <ChevronDown size={16} className="icono-flecha-menu" />
+                        </div>
+                        {menuAbierto === 'video' && (
+                            <div className="menu-desplegable">
+                                <div className="columna-menu">
+                                    <h4 className="titulo-columna">CONVERTIR</h4>
+                                    {herramientasVideo.map(herramienta => {
                                         const Icono = herramienta.icono;
                                         return (
                                             <Link

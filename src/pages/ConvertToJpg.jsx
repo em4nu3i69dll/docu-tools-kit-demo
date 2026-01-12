@@ -1,78 +1,84 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
+import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
 import JSZip from 'jszip';
 import { Upload, Download, Archive, Trash2, ArrowRight, Plus, FileImage } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ConvertToJpg() {
-    const [images, setImages] = useState([]);
-    const [convertedImages, setConvertedImages] = useState([]);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [imagenes, setImagenes] = useState([]);
+    const [imagenesConvertidas, setImagenesConvertidas] = useState([]);
+    const [estaProcesando, setEstaProcesando] = useState(false);
 
-    const onDrop = useCallback((acceptedFiles) => {
-        acceptedFiles.forEach(file => {
-            setImages(prev => [...prev, {
-                file,
+    const mensajeProcesamiento = useMensajesProcesamiento(estaProcesando);
+
+    const alSoltar = useCallback((archivosAceptados) => {
+        archivosAceptados.forEach(archivo => {
+            setImagenes(prev => [...prev, {
+                file: archivo,
                 id: Math.random().toString(36).substr(2, 9),
-                preview: URL.createObjectURL(file)
+                preview: URL.createObjectURL(archivo)
             }]);
         });
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
+        onDrop: alSoltar,
         accept: { 'image/*': [] }
     });
 
-    const convertToJpg = (img) => {
-        return new Promise((resolve) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const image = new Image();
-            image.src = img.preview;
+    usePasteFiles(alSoltar, ['image/']);
 
-            image.onload = () => {
-                canvas.width = image.width;
-                canvas.height = image.height;
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(image, 0, 0);
+    const convertirAJpg = (imagen) => {
+        return new Promise((resolver) => {
+            const lienzo = document.createElement('canvas');
+            const contexto = lienzo.getContext('2d');
+            const objetoImagen = new Image();
+            objetoImagen.src = imagen.preview;
 
-                canvas.toBlob((blob) => {
-                    const name = img.file.name.substring(0, img.file.name.lastIndexOf('.')) + '.jpg';
-                    resolve({
-                        id: img.id,
-                        originalName: img.file.name,
-                        convertedName: name,
-                        convertedBlob: blob
+            objetoImagen.onload = () => {
+                lienzo.width = objetoImagen.width;
+                lienzo.height = objetoImagen.height;
+                contexto.fillStyle = '#FFFFFF';
+                contexto.fillRect(0, 0, lienzo.width, lienzo.height);
+                contexto.drawImage(objetoImagen, 0, 0);
+
+                lienzo.toBlob((blob) => {
+                    const nombre = imagen.file.name.substring(0, imagen.file.name.lastIndexOf('.')) + '.jpg';
+                    resolver({
+                        id: imagen.id,
+                        nombreOriginal: imagen.file.name,
+                        nombreConvertido: nombre,
+                        blobConvertido: blob
                     });
                 }, 'image/jpeg', 0.95);
             };
         });
     };
 
-    const handleConvert = async () => {
-        setIsProcessing(true);
-        const results = [];
-        for (const img of images) {
-            const result = await convertToJpg(img);
-            results.push(result);
+    const manejarConvertir = async () => {
+        setEstaProcesando(true);
+        const resultados = [];
+        for (const imagen of imagenes) {
+            const resultado = await convertirAJpg(imagen);
+            resultados.push(resultado);
         }
-        setConvertedImages(results);
-        setIsProcessing(false);
+        setImagenesConvertidas(resultados);
+        setEstaProcesando(false);
     };
 
-    const downloadAll = async () => {
-        if (convertedImages.length === 1) {
-            descargarArchivo(convertedImages[0].convertedBlob, convertedImages[0].convertedName);
+    const descargarTodo = async () => {
+        if (imagenesConvertidas.length === 1) {
+            descargarArchivo(imagenesConvertidas[0].blobConvertido, imagenesConvertidas[0].nombreConvertido);
         } else {
             const zip = new JSZip();
-            convertedImages.forEach(res => {
-                zip.file(`eimage-${res.convertedName}`, res.convertedBlob);
+            imagenesConvertidas.forEach(resultado => {
+                zip.file(`eimage-${resultado.nombreConvertido}`, resultado.blobConvertido);
             });
-            const content = await zip.generateAsync({ type: "blob" });
-            descargarArchivo(content, "imagenes_convertidas_jpg.zip");
+            const contenido = await zip.generateAsync({ type: "blob" });
+            descargarArchivo(contenido, "imagenes_convertidas_jpg.zip");
         }
     };
 
@@ -83,55 +89,65 @@ export default function ConvertToJpg() {
                 <p style={{ color: 'var(--text-muted)' }}>Convierte PNG, GIF, BMP, WEBP a formato JPG.</p>
             </div>
 
-            {images.length === 0 ? (
+            {imagenes.length === 0 ? (
                 <div {...getRootProps()} className="panel-vidrio" style={{
-                    borderRadius: '1.5rem',
-                    padding: '4rem',
+                    borderRadius: '2rem',
+                    padding: '6rem 2rem',
                     textAlign: 'center',
                     cursor: 'pointer',
                     maxWidth: '800px',
                     margin: '0 auto',
-                    transition: 'all 0.3s ease',
-                    border: isDragActive ? '1px solid #f59e0b' : '1px solid var(--border-light)',
-                    boxShadow: isDragActive ? '0 0 20px rgba(245, 158, 11, 0.2)' : 'none'
+                    border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
+                    background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                    transition: 'all 0.3s ease'
                 }}>
                     <input {...getInputProps()} />
-                    <Upload size={64} style={{ marginBottom: '1.5rem', color: isDragActive ? '#f59e0b' : 'var(--text-muted)' }} />
-                    <h3 className="fuente-titulo" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
-                    <button className="btn-principal">
-                        Elegir imágenes
-                    </button>
+                    <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
+                    <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar imágenes</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                        Arrastra y suelta o presiona Ctrl+V para pegar
+                    </p>
+                    <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivos</button>
                 </div>
             ) : (
-                <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', position: 'relative' }}>
+                    {estaProcesando && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 100, borderRadius: '1rem' }}>
+                            <div className="anillo-cargador"></div>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>CONVIRTIENDO A JPG</p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', minHeight: '1.5rem' }}>{mensajeProcesamiento}</p>
+                            </div>
+                        </div>
+                    )}
                     <div className="panel-vidrio" style={{ padding: '1.5rem', borderRadius: '1rem' }}>
                         <h3 className="fuente-titulo" style={{ marginTop: 0, marginBottom: '1rem' }}>
-                            {convertedImages.length === 0 ? 'Imágenes originales' : 'Imágenes convertidas a JPG'}
+                            {imagenesConvertidas.length === 0 ? 'Imágenes originales' : 'Imágenes convertidas a JPG'}
                         </h3>
 
                         <div style={{ display: 'grid', gap: '1rem', maxHeight: '500px', overflowY: 'auto' }} className="barra-desplazamiento-personalizada">
                             <AnimatePresence>
-                                {convertedImages.length === 0 ? (
-                                    images.map(img => (
+                                {imagenesConvertidas.length === 0 ? (
+                                    imagenes.map(imagen => (
                                         <motion.div
-                                            key={img.id}
+                                            key={imagen.id}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, x: -10 }}
                                             className="panel-vidrio"
                                             style={{ display: 'flex', alignItems: 'center', padding: '1rem', borderRadius: '0.5rem' }}
                                         >
-                                            <img src={img.preview} alt="" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.25rem', marginRight: '1rem' }} />
-                                            <span style={{ flex: 1, fontWeight: 500 }}>{img.file.name}</span>
-                                            <button onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem' }}>
+                                            <img src={imagen.preview} alt="" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.25rem', marginRight: '1rem' }} />
+                                            <span style={{ flex: 1, fontWeight: 500 }}>{imagen.file.name}</span>
+                                            <button onClick={() => setImagenes(prev => prev.filter(i => i.id !== imagen.id))} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem' }}>
                                                 <Trash2 size={20} />
                                             </button>
                                         </motion.div>
                                     ))
                                 ) : (
-                                    convertedImages.map(result => (
+                                    imagenesConvertidas.map(resultado => (
                                         <motion.div
-                                            key={result.id}
+                                            key={resultado.id}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className="panel-vidrio"
@@ -139,13 +155,13 @@ export default function ConvertToJpg() {
                                         >
                                             <FileImage size={40} style={{ marginRight: '1rem', color: '#f59e0b' }} />
                                             <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 500 }}>{result.convertedName}</div>
+                                                <div style={{ fontWeight: 500 }}>{resultado.nombreConvertido}</div>
                                                 <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                                                    Convertido desde {result.originalName}
+                                                    Convertido desde {resultado.nombreOriginal}
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => descargarArchivo(result.convertedBlob, result.convertedName)}
+                                                onClick={() => descargarArchivo(resultado.blobConvertido, resultado.nombreConvertido)}
                                                 className="btn-secundario"
                                                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
                                             >
@@ -157,7 +173,7 @@ export default function ConvertToJpg() {
                             </AnimatePresence>
                         </div>
 
-                        {convertedImages.length === 0 && (
+                        {imagenesConvertidas.length === 0 && (
                             <div style={{ marginTop: '1rem' }}>
                                 <button {...getRootProps()} className="btn-secundario" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <input {...getInputProps()} />
@@ -175,27 +191,27 @@ export default function ConvertToJpg() {
                             Las imágenes se convertirán a formato JPG con fondo blanco (ideal para transparencias).
                         </p>
 
-                        {convertedImages.length === 0 ? (
+                        {imagenesConvertidas.length === 0 ? (
                             <button
                                 className="btn-principal"
-                                onClick={handleConvert}
-                                disabled={isProcessing}
+                                onClick={manejarConvertir}
+                                disabled={estaProcesando}
                                 style={{
                                     width: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: '0.5rem',
-                                    opacity: isProcessing ? 0.7 : 1
+                                    opacity: estaProcesando ? 0.7 : 1
                                 }}
                             >
-                                {isProcessing ? 'Convirtiendo...' : <><ArrowRight size={20} /> Convertir a JPG</>}
+                                {estaProcesando ? 'Convirtiendo...' : <><ArrowRight size={20} /> Convertir a JPG</>}
                             </button>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 <button
                                     className="btn-principal"
-                                    onClick={downloadAll}
+                                    onClick={descargarTodo}
                                     style={{
                                         width: '100%',
                                         display: 'flex',
@@ -204,13 +220,13 @@ export default function ConvertToJpg() {
                                         gap: '0.5rem'
                                     }}
                                 >
-                                    <Download size={20} /> Descargar {convertedImages.length > 1 ? 'todas' : 'imagen'}
+                                    <Download size={20} /> Descargar {imagenesConvertidas.length > 1 ? 'todas' : 'imagen'}
                                 </button>
                                 <button
                                     className="btn-secundario"
                                     onClick={() => {
-                                        setConvertedImages([]);
-                                        setImages([]);
+                                        setImagenesConvertidas([]);
+                                        setImagenes([]);
                                     }}
                                     style={{
                                         width: '100%',

@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { descargarArchivo } from '../utils/download';
+import { usePasteFiles } from '../utils/usePasteFiles';
 import Cropper from 'react-easy-crop';
 import { Upload, Download, Check, RefreshCw, X, Crop, Maximize, Square, Monitor, Smartphone, Camera, Frame, Unlock, CheckCircle } from 'lucide-react';
 import { obtenerImagenRecortada } from '../utils/cropImage';
 
-const ASPECT_RATIOS = [
+const PROPORCIONES = [
     { label: 'Libre', value: undefined, Icon: Unlock },
     { label: 'Cuadrado (1:1)', value: 1, Icon: Square },
     { label: 'Horizontal (16:9)', value: 16 / 9, Icon: Monitor },
@@ -15,92 +16,99 @@ const ASPECT_RATIOS = [
 ];
 
 export default function CropImage() {
-    const [image, setImage] = useState(null);
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [imagen, setImagen] = useState(null);
+    const [recorte, setRecorte] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
-    const [aspectRatio, setAspectRatio] = useState(undefined);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-    const [croppedImage, setCroppedImage] = useState(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [proporcion, setProporcion] = useState(undefined);
+    const [pixelesAreaRecortada, setPixelesAreaRecortada] = useState(null);
+    const [imagenRecortada, setImagenRecortada] = useState(null);
+    const [estaProcesando, setEstaProcesando] = useState(false);
 
-    const onDrop = useCallback((acceptedFiles) => {
-        const file = acceptedFiles[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setImage({
-                    src: reader.result,
-                    name: file.name,
-                    type: file.type
+    const alSoltar = useCallback((archivosAceptados) => {
+        const archivo = archivosAceptados[0];
+        if (archivo) {
+            const lector = new FileReader();
+            lector.onload = () => {
+                setImagen({
+                    src: lector.result,
+                    name: archivo.name,
+                    type: archivo.type
                 });
-                setCroppedImage(null);
+                setImagenRecortada(null);
             };
-            reader.readAsDataURL(file);
+            lector.readAsDataURL(archivo);
         }
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
+        onDrop: alSoltar,
         accept: { 'image/*': [] },
         multiple: false
     });
 
-    const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-        setCroppedAreaPixels(croppedAreaPixels);
+    usePasteFiles((archivos) => {
+        if (archivos.length > 0) {
+            alSoltar(archivos);
+        }
+    }, ['image/']);
+
+    const alCompletarRecorte = useCallback((areaRecortada, pixelesAreaRecortada) => {
+        setPixelesAreaRecortada(pixelesAreaRecortada);
     }, []);
 
-    const handleCrop = async () => {
-        if (!image || !croppedAreaPixels) return;
-        setIsProcessing(true);
+    const manejarRecortar = async () => {
+        if (!imagen || !pixelesAreaRecortada) return;
+        setEstaProcesando(true);
         try {
-            const croppedBlob = await obtenerImagenRecortada(image.src, croppedAreaPixels, image.type);
-            setCroppedImage({
-                blob: croppedBlob,
-                name: image.name
+            const blobRecortado = await obtenerImagenRecortada(imagen.src, pixelesAreaRecortada, imagen.type);
+            setImagenRecortada({
+                blob: blobRecortado,
+                name: imagen.name
             });
         } catch (e) {
         }
-        setIsProcessing(false);
+        setEstaProcesando(false);
     };
 
-    const handleDownload = () => {
-        if (croppedImage) {
-            descargarArchivo(croppedImage.blob, croppedImage.name);
+    const manejarDescargar = () => {
+        if (imagenRecortada) {
+            descargarArchivo(imagenRecortada.blob, imagenRecortada.name);
         }
     };
 
-    const handleReset = () => {
-        setImage(null);
-        setCroppedImage(null);
-        setCrop({ x: 0, y: 0 });
+    const manejarReiniciar = () => {
+        setImagen(null);
+        setImagenRecortada(null);
+        setRecorte({ x: 0, y: 0 });
         setZoom(1);
-        setAspectRatio(undefined);
+        setProporcion(undefined);
     };
 
     return (
         <div className="contenedor animar-aparecer" style={{ minHeight: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column', paddingBottom: '2rem' }}>
-            {!image ? (
+            {!imagen ? (
                 <div style={{ textAlign: 'center', marginTop: '4rem' }}>
                     <h1 className="fuente-titulo" style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '1rem' }}>Recortar IMAGEN</h1>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>Recorta un área específica de tu foto con diferentes proporciones.</p>
 
                     <div {...getRootProps()} className="panel-vidrio" style={{
-                        borderRadius: '1.5rem',
-                        padding: '4rem',
+                        borderRadius: '2rem',
+                        padding: '6rem 2rem',
                         textAlign: 'center',
                         cursor: 'pointer',
                         maxWidth: '800px',
                         margin: '0 auto',
-                        transition: 'all 0.3s ease',
-                        border: isDragActive ? '1px solid #c084fc' : '1px solid var(--border-light)',
-                        boxShadow: isDragActive ? '0 0 20px rgba(192, 132, 252, 0.2)' : 'none'
+                        border: isDragActive ? '2px dashed var(--primary-color)' : '1px solid var(--border-light)',
+                        background: isDragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                        transition: 'all 0.3s ease'
                     }}>
                         <input {...getInputProps()} />
-                        <Upload size={64} style={{ marginBottom: '1.5rem', color: isDragActive ? '#c084fc' : 'var(--text-muted)' }} />
-                        <h3 className="fuente-titulo" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Seleccionar imagen</h3>
-                        <button className="btn-principal">
-                            Elegir imagen
-                        </button>
+                        <Upload size={64} style={{ marginBottom: '1.5rem', color: 'var(--primary-color)' }} />
+                        <h3 className="fuente-titulo" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>Seleccionar imagen</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+                            Arrastra y suelta o presiona Ctrl+V para pegar
+                        </p>
+                        <button className="btn-principal" style={{ padding: '1rem 2.5rem' }}>Elegir archivo</button>
                     </div>
                 </div>
             ) : (
@@ -111,19 +119,19 @@ export default function CropImage() {
                                 <Crop size={24} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }} />
                                 Ajustar recorte
                             </h2>
-                            <button onClick={handleReset} className="btn-secundario" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button onClick={manejarReiniciar} className="btn-secundario" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <X size={18} /> Cancelar
                             </button>
                         </div>
 
                         <div className="panel-vidrio" style={{ position: 'relative', height: '500px', borderRadius: '1rem', overflow: 'hidden' }}>
                             <Cropper
-                                image={image.src}
-                                crop={crop}
+                                image={imagen.src}
+                                crop={recorte}
                                 zoom={zoom}
-                                aspect={aspectRatio}
-                                onCropChange={setCrop}
-                                onCropComplete={onCropComplete}
+                                aspect={proporcion}
+                                onCropChange={setRecorte}
+                                onCropComplete={alCompletarRecorte}
                                 onZoomChange={setZoom}
                                 style={{
                                     containerStyle: { background: 'transparent' },
@@ -156,18 +164,18 @@ export default function CropImage() {
                                 <Maximize size={20} /> Proporción
                             </h3>
                             <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                {ASPECT_RATIOS.map((ratio) => (
+                                {PROPORCIONES.map((proporcionItem) => (
                                     <button
-                                        key={ratio.label}
-                                        onClick={() => setAspectRatio(ratio.value)}
+                                        key={proporcionItem.label}
+                                        onClick={() => setProporcion(proporcionItem.value)}
                                         style={{
                                             padding: '0.75rem',
                                             borderRadius: '0.5rem',
-                                            border: aspectRatio === ratio.value ? '2px solid var(--primary-color)' : '1px solid var(--border-light)',
-                                            backgroundColor: aspectRatio === ratio.value ? 'rgba(192, 132, 252, 0.1)' : 'transparent',
-                                            color: aspectRatio === ratio.value ? '#fff' : 'var(--text-muted)',
+                                            border: proporcion === proporcionItem.value ? '2px solid var(--primary-color)' : '1px solid var(--border-light)',
+                                            backgroundColor: proporcion === proporcionItem.value ? 'rgba(192, 132, 252, 0.1)' : 'transparent',
+                                            color: proporcion === proporcionItem.value ? '#fff' : 'var(--text-muted)',
                                             cursor: 'pointer',
-                                            fontWeight: aspectRatio === ratio.value ? 600 : 400,
+                                            fontWeight: proporcion === proporcionItem.value ? 600 : 400,
                                             transition: 'all 0.2s',
                                             textAlign: 'left',
                                             display: 'flex',
@@ -175,14 +183,14 @@ export default function CropImage() {
                                             gap: '0.5rem'
                                         }}
                                     >
-                                        <ratio.Icon size={20} style={{ flexShrink: 0 }} />
-                                        <span>{ratio.label}</span>
+                                        <proporcionItem.Icon size={20} style={{ flexShrink: 0 }} />
+                                        <span>{proporcionItem.label}</span>
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        {croppedImage ? (
+                        {imagenRecortada ? (
                             <div className="panel-vidrio" style={{ padding: '1.5rem', borderRadius: '1rem' }}>
                                 <h3 className="fuente-titulo" style={{ marginTop: 0, marginBottom: '1rem', color: '#4ade80', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <CheckCircle size={20} /> Imagen recortada
@@ -190,7 +198,7 @@ export default function CropImage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     <button
                                         className="btn-principal"
-                                        onClick={handleDownload}
+                                        onClick={manejarDescargar}
                                         style={{
                                             width: '100%',
                                             display: 'flex',
@@ -203,7 +211,7 @@ export default function CropImage() {
                                     </button>
                                     <button
                                         className="btn-secundario"
-                                        onClick={() => setCroppedImage(null)}
+                                        onClick={() => setImagenRecortada(null)}
                                         style={{
                                             width: '100%',
                                             display: 'flex',
@@ -219,24 +227,38 @@ export default function CropImage() {
                         ) : (
                             <button
                                 className="btn-principal"
-                                onClick={handleCrop}
-                                disabled={isProcessing}
+                                onClick={manejarRecortar}
+                                disabled={estaProcesando}
                                 style={{
                                     width: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: '0.5rem',
-                                    opacity: isProcessing ? 0.7 : 1,
+                                    opacity: estaProcesando ? 0.7 : 1,
                                     padding: '1rem'
                                 }}
                             >
-                                {isProcessing ? 'Procesando...' : <><Check size={20} /> Recortar IMAGEN</>}
+                                {estaProcesando ? 'Procesando...' : <><Check size={20} /> Recortar IMAGEN</>}
                             </button>
                         )}
                     </div>
                 </div>
             )}
+
+            <style>{`
+                .anillo-cargador {
+                    width: 70px;
+                    height: 70px;
+                    border: 5px solid rgba(255,255,255,0.1);
+                    border-top-color: var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+                @keyframes spin {
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }
