@@ -7,21 +7,22 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-**Suite completa de herramientas para procesamiento de imágenes y PDFs**
+**Suite completa de herramientas para procesamiento de imágenes, PDFs y Videos**
 
 </div>
 
 ---
 ## 📸 Fotos del proyecto
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1f029cf3-a96e-4a2a-a7d1-79791f2b237b" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d3ba4080-7e6a-4ef2-9ef3-73f9ae353bd7" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5eb7a9e8-3d64-4f65-9cdb-cde3ad3dffcc" />
-<img width="1919" height="1080" alt="image" src="https://github.com/user-attachments/assets/9ad5a3dd-ab00-4a4f-a67e-b8eaf38511f4" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/15609643-8441-4d4c-8c68-f2e6e212453c" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/996676a1-8d64-410f-8b72-f06cfae74ca8" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2d96e7a1-abdf-4399-b67f-60965280d920" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0d974495-7a2b-4dc9-aa75-3d2110f07e8d" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/90742948-824c-4c10-a887-dfe2b30ca826" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/09ff72d0-d09e-4105-9577-ca97e466cf50" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8cf1b9d6-b138-4b49-82c8-1ca920fb39fe" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/49988276-2979-488c-8431-706cda00505a" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b6677b9d-87d4-4d6c-95e2-c0667f768894" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/da553e54-784c-4577-b0dd-a566ffb573e9" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5b18c98c-df7f-41a6-8e20-254f7bb1fcbc" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3bf790bb-b553-4997-9f6d-72fc62b18db3" />
+
 
 
 ## 📋 Web Demo
@@ -68,6 +69,13 @@ https://docutoolskit.em4nu3l69dll.dev/
 | **PDF a Word** | Convierte documentos PDF a archivos DOCX editables |
 | **PDF a JPG** | Extrae imágenes de un PDF o convierte cada página a JPG |
 | **JPG a PDF** | Convierte imágenes JPG a documentos PDF con orientación personalizable |
+
+### 🎬 Herramientas de Video  (NUEVO) 
+
+| Herramienta | Descripción |
+|------------|-------------|
+| **MP4 a GIF** | Convierte videos MP4 en GIFs animados de alta calidad con control de FPS, calidad y tamaño |
+| **Convertir Video** | Convierte cualquier formato de video (MP4, WebM, MOV, AVI, MKV, WMV) a otro formato compatible |
 
 ---
 
@@ -157,6 +165,18 @@ npm run preview
 - Descarga imágenes individuales o todas en un ZIP
 - Resultado en PNG con transparencia perfecta
 
+#### MP4 a GIF 
+- Sube un video MP4 (hasta 45 segundos)
+- Ajusta FPS (5-30), calidad (1-30) y ancho máximo (200-800px)
+- Procesa los primeros 45 segundos automáticamente si el video es más largo
+- Descarga el GIF generado con alta calidad
+
+#### Convertir Video 
+- Sube cualquier formato de video (MP4, WebM, MOV, AVI, MKV, WMV)
+- Selecciona el formato de salida deseado
+- Convierte entre formatos manteniendo la calidad
+- Procesamiento 100% local usando FFmpeg.wasm
+
 
 ## 🛠️ Tecnologías
 
@@ -179,6 +199,16 @@ npm run preview
 - **[jszip 3.10.1](https://stuk.github.io/jszip/)** - Manejo de archivos ZIP
 - **[file-saver 2.0.5](https://github.com/eligrey/FileSaver.js/)** - Descarga de archivos
 - **[react-dropzone 14.3.8](https://react-dropzone.js.org/)** - Drag & drop de archivos
+- **[@ffmpeg/ffmpeg 0.12.15](https://ffmpegwasm.netlify.app/)** - Conversión de video en el navegador
+- **[@ffmpeg/util 0.12.2](https://ffmpegwasm.netlify.app/)** - Utilidades para FFmpeg.wasm
+
+## 🎨 Características de Diseño
+
+- **Interfaz moderna**: Diseño glassmorphism con efectos de vidrio
+- **Responsive**: Adaptable a todos los dispositivos (móvil, tablet, desktop)
+- **Animaciones fluidas**: Transiciones suaves con Framer Motion
+- **Tema oscuro**: Interfaz optimizada para uso prolongado
+- **UX intuitiva**: Drag & drop, feedback visual, y controles claros
 
 ## 🎨 Características de Diseño
 
