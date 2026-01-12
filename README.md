@@ -14,10 +14,14 @@
 ---
 ## 📸 Fotos del proyecto
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ddb6a0c7-85e2-45be-b0c2-44425a43f0a0" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1d42aa33-bb34-4f35-b072-cd22c44b8455" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b59974ea-3b88-4056-bc7b-8736d323fe4b" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2c17f389-2671-46a6-bedf-27914bb4f542" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1f029cf3-a96e-4a2a-a7d1-79791f2b237b" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d3ba4080-7e6a-4ef2-9ef3-73f9ae353bd7" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5eb7a9e8-3d64-4f65-9cdb-cde3ad3dffcc" />
+<img width="1919" height="1080" alt="image" src="https://github.com/user-attachments/assets/9ad5a3dd-ab00-4a4f-a67e-b8eaf38511f4" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/15609643-8441-4d4c-8c68-f2e6e212453c" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/996676a1-8d64-410f-8b72-f06cfae74ca8" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2d96e7a1-abdf-4399-b67f-60965280d920" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0d974495-7a2b-4dc9-aa75-3d2110f07e8d" />
 
 
 ## 📋 Web Demo
@@ -52,6 +56,7 @@ https://docutoolskit.em4nu3l69dll.dev/
 | **Girar Imagen** | Gira múltiples imágenes JPG, PNG o GIF simultáneamente |
 | **Marca de Agua** | Añade texto o imágenes como marca de agua a tus fotografías |
 | **HTML a Imagen** | Convierte código HTML a imágenes JPG o SVG |
+| **Remover Fondo** | Elimina el fondo de tus imágenes automáticamente
 
 ### 📄 Herramientas de PDF
 
@@ -146,6 +151,12 @@ npm run preview
 - Selecciona el formato destino
 - Descarga los archivos convertidos
 
+#### Remover Fondo
+- Arrastra hasta 20 imágenes simultáneamente
+- Procesa individualmente o todas a la vez
+- Descarga imágenes individuales o todas en un ZIP
+- Resultado en PNG con transparencia perfecta
+
 
 ## 🛠️ Tecnologías
 
@@ -160,6 +171,7 @@ npm run preview
 ### Procesamiento de Archivos
 
 - **[browser-image-compression 2.0.2](https://github.com/Donaldcwl/browser-image-compression)** - Compresión de imágenes
+- **[@imgly/background-removal 1.3.0](https://github.com/imgly/background-removal-js)** - Eliminación de fondos
 - **[pdf-lib 1.17.1](https://pdf-lib.js.org/)** - Manipulación de PDFs
 - **[pdfjs-dist 5.4.530](https://mozilla.github.io/pdf.js/)** - Renderizado de PDFs
 - **[html2canvas 1.4.1](https://html2canvas.hertzen.com/)** - Conversión HTML a imagen
