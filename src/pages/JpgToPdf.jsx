@@ -1,3 +1,4 @@
+import { Upload } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';

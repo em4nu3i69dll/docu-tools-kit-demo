@@ -1,7 +1,9 @@
+import { Upload } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { motion, AnimatePresence } from 'framer-motion';
 import { descargarArchivo } from '../utils/download';
 import { usePasteFiles } from '../utils/usePasteFiles';
@@ -13,7 +15,7 @@ import {
     Plus, Scale, ChevronLeft
 } from 'lucide-react';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export default function SplitPdf() {
     const [pdfFile, setPdfFile] = useState(null);

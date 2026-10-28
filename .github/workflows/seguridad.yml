@@ -1,0 +1,30 @@
+name: Comprobaciones de seguridad
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Preparar Node
+        run: docker pull node@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c
+      - name: Ejecutar pruebas sin red ni secretos
+        run: |
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 --memory 256m --cpus 1 --pids-limit 64 \
+            --ulimit nofile=256:256 --ulimit fsize=16777216:16777216 \
+            --tmpfs /scratch:rw,nosuid,noexec,size=32m,mode=1777 \
+            -v "$PWD:/fuente:ro" -w /fuente \
+            node@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c \
+            env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/scratch TMPDIR=/scratch \
+            timeout 40s node --test pruebas/*.test.js

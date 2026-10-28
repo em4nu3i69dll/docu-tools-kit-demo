@@ -1,13 +1,14 @@
 {
   "name": "docu-tools-kit",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test pruebas/*.test.js"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
@@ -21,7 +22,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^0.562.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^5.4.530",
+    "pdfjs-dist": "5.4.530",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
@@ -38,5 +39,8 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "vite": "^7.2.4"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

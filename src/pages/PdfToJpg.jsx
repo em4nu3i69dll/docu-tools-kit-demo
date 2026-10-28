@@ -1,6 +1,9 @@
+import { Upload } from 'lucide-react';
+import { usePasteFiles } from '../utils/usePasteFiles';
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import JSZip from 'jszip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { descargarArchivo } from '../utils/download';
@@ -11,7 +14,7 @@ import {
     ChevronLeft, Settings2, Download, Zap
 } from 'lucide-react';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export default function PdfToJpg() {
     const [pdfFile, setPdfFile] = useState(null);

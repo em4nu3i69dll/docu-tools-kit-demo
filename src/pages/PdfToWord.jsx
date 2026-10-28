@@ -1,6 +1,10 @@
+import { escaparHtml } from '../utils/htmlSeguro';
+import { Upload } from 'lucide-react';
+import { usePasteFiles } from '../utils/usePasteFiles';
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { motion, AnimatePresence } from 'framer-motion';
 import { descargarArchivo } from '../utils/download';
 import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
@@ -10,7 +14,7 @@ import {
     ChevronLeft, Settings2, Download, Wand2
 } from 'lucide-react';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export default function PdfToWord() {
     const [pdfFile, setPdfFile] = useState(null);
@@ -87,7 +91,7 @@ export default function PdfToWord() {
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'></head>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6;">
-                    ${fullText.replace(/\n/g, '<br>')}
+                    ${escaparHtml(fullText).replace(/\n/g, '<br>')}
                 </body>
                 </html>
             `;

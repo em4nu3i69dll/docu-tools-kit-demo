@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import { crearDocumentoSeguro } from '../utils/htmlSeguro';
+import React, { useState, useRef, useMemo } from 'react';
 import html2canvas from 'html2canvas';
 import { descargarArchivo } from '../utils/download';
 import { useMensajesProcesamiento } from '../utils/useMensajesProcesamiento';
@@ -119,26 +120,41 @@ export default function HtmlToImage() {
     const mensajeProcesamiento = useMensajesProcesamiento(isProcessing);
     const previewRef = useRef(null);
     const containerRef = useRef(null);
+    const [tamano, setTamano] = useState({ width: 720, height: 480 });
+    const [error, setError] = useState('');
+    const documentoSeguro = useMemo(() => crearDocumentoSeguro(htmlContent), [htmlContent]);
+    const ajustarVistaPrevia = () => {
+        const cuerpo = previewRef.current?.contentDocument?.body;
+        if (!cuerpo) return;
+        const width = Math.min(4096, Math.max(320, cuerpo.scrollWidth));
+        const height = Math.min(4096, Math.max(200, cuerpo.scrollHeight));
+        setTamano({ width, height });
+    };
 
     const handleConvert = async () => {
         if (!previewRef.current) return;
         setIsProcessing(true);
         try {
-            const element = previewRef.current;
+            const element = previewRef.current.contentDocument?.body;
+            if (!element) throw new Error('La vista previa todavía no está disponible');
+            if (element.scrollWidth * element.scrollHeight * 4 > 32000000) throw new Error('El diseño supera el límite de 32 megapíxeles');
+            setError('');
             const canvas = await html2canvas(element, {
                 backgroundColor: null,
                 scale: 2,
-                useCORS: true,
+                useCORS: false,
                 logging: false,
                 width: element.scrollWidth,
                 height: element.scrollHeight
             });
 
             canvas.toBlob((blob) => {
-                descargarArchivo(blob, 'eimage-html.png');
+                if (blob) descargarArchivo(blob, 'eimage-html.png');
+                else setError('No se pudo generar la imagen');
                 setIsProcessing(false);
             }, 'image/png');
         } catch (error) {
+            setError(error.message || 'No se pudo generar la imagen');
             setIsProcessing(false);
         }
     };
@@ -177,6 +193,7 @@ export default function HtmlToImage() {
                     </div>
 
                     <textarea
+                        maxLength={200000}
                         value={htmlContent}
                         onChange={(e) => setHtmlContent(e.target.value)}
                         className="barra-desplazamiento-personalizada"
@@ -198,6 +215,7 @@ export default function HtmlToImage() {
                         }}
                     />
 
+                    {error && <p role="alert">{error}</p>}
                     <button
                         className="btn-principal"
                         onClick={handleConvert}
@@ -243,12 +261,18 @@ export default function HtmlToImage() {
                         whileTap={{ cursor: 'grabbing' }}
                         style={{ display: 'inline-block', touchAction: 'none' }}
                     >
-                        <div
+                        <iframe
                             ref={previewRef}
-                            dangerouslySetInnerHTML={{ __html: htmlContent }}
+                            title="Vista previa del HTML"
+                            sandbox="allow-same-origin"
+                            referrerPolicy="no-referrer"
+                            srcDoc={documentoSeguro}
+                            onLoad={ajustarVistaPrevia}
                             style={{
-                                display: 'inline-block',
-                                minWidth: 'min-content',
+                                display: 'block',
+                                border: 0,
+                                width: tamano.width,
+                                height: tamano.height,
                                 pointerEvents: 'none',
                                 borderRadius: '1rem',
                                 boxShadow: '0 30px 60px rgba(0,0,0,0.8)'

@@ -3,7 +3,7 @@
 <div align="center">
 
 ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.3.7-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
@@ -31,7 +31,7 @@ https://docutoolskit.em4nu3l69dll.dev/
 
 ## 📋 Descripción
 
-**Docu-Tools Kit** es una aplicación web moderna y completa que ofrece un conjunto de herramientas profesionales para el procesamiento de imágenes y documentos PDF. Todas las operaciones se realizan **100% en el navegador**, garantizando máxima privacidad y seguridad, ya que ningún archivo se sube a servidores externos a diferencias de todos los suits que existen como iLoveIMG & iLovePDF.
+**Docu-Tools Kit** es una aplicación web moderna y completa que ofrece un conjunto de herramientas profesionales para el procesamiento de imágenes y documentos PDF. Todas las operaciones se realizan **100% en el navegador**, sin un backend propio para subir documentos. Algunas funciones descargan motores, modelos y recursos de terceros al iniciarse.
 
 ### 🔒 Privacidad y Seguridad
 
@@ -56,7 +56,7 @@ https://docutoolskit.em4nu3l69dll.dev/
 | **Editor de Fotos** | Aplica filtros, efectos, rotaciones y transformaciones a tus imágenes |
 | **Girar Imagen** | Gira múltiples imágenes JPG, PNG o GIF simultáneamente |
 | **Marca de Agua** | Añade texto o imágenes como marca de agua a tus fotografías |
-| **HTML a Imagen** | Convierte código HTML a imágenes JPG o SVG |
+| **HTML a Imagen** | Convierte HTML estático a PNG en una vista previa aislada |
 | **Remover Fondo** | Elimina el fondo de tus imágenes automáticamente
 
 ### 📄 Herramientas de PDF
@@ -66,11 +66,11 @@ https://docutoolskit.em4nu3l69dll.dev/
 | **Unir PDF** | Combina múltiples archivos PDF en un solo documento |
 | **Dividir PDF** | Extrae páginas específicas o divide un PDF en múltiples archivos |
 | **Comprimir PDF** | Reduce el tamaño de archivos PDF manteniendo la calidad |
-| **PDF a Word** | Convierte documentos PDF a archivos DOCX editables |
+| **PDF a Word** | Extrae texto de un PDF y lo exporta como documento DOC editable |
 | **PDF a JPG** | Extrae imágenes de un PDF o convierte cada página a JPG |
 | **JPG a PDF** | Convierte imágenes JPG a documentos PDF con orientación personalizable |
 
-### 🎬 Herramientas de Video  (NUEVO) 
+### 🎬 Herramientas de Video  (NUEVO)
 
 | Herramienta | Descripción |
 |------------|-------------|
@@ -165,13 +165,13 @@ npm run preview
 - Descarga imágenes individuales o todas en un ZIP
 - Resultado en PNG con transparencia perfecta
 
-#### MP4 a GIF 
+#### MP4 a GIF
 - Sube un video MP4 (hasta 45 segundos)
 - Ajusta FPS (5-30), calidad (1-30) y ancho máximo (200-800px)
 - Procesa los primeros 45 segundos automáticamente si el video es más largo
 - Descarga el GIF generado con alta calidad
 
-#### Convertir Video 
+#### Convertir Video
 - Sube cualquier formato de video (MP4, WebM, MOV, AVI, MKV, WMV)
 - Selecciona el formato de salida deseado
 - Convierte entre formatos manteniendo la calidad
@@ -221,3 +221,18 @@ Este proyecto esta libre para que lo utilicen de la forma que mas les guste, son
 - 🌐 Website: [em4nu3l69dll.dev](https://em4nu3l69dll.dev)
 - 💼 GitHub: [@em4nu3i69dll](https://github.com/em4nu3i69dll)
 
+
+## Actualización 0.0.1
+
+- La previsualización HTML se abre en un iframe aislado, sin scripts, formularios ni conexiones externas. Conserva HTML y CSS estáticos e imágenes incrustadas en base64.
+- Límite de 200.000 caracteres para HTML y 32 megapíxeles para su exportación.
+- El texto extraído de PDF se escapa antes de generar el documento Word.
+- El worker de PDF.js se sirve desde la aplicación con la misma versión que el lector.
+- Corregidas importaciones que impedían abrir las pantallas de PDF a Word y PDF a JPG.
+- Actualizadas las dependencias con correcciones disponibles dentro de sus versiones compatibles.
+
+Ejecutá `npm test` para las comprobaciones de exportación y política de contenido.
+
+### Dependencia pendiente
+
+`npm audit` mantiene dos alertas altas asociadas a la misma dependencia Zod que utiliza el motor de eliminación de fondos. El proveedor todavía requiere Zod 3 y también incluye código de esa versión dentro de su distribución. Cambiar solo la versión transitiva no corrige ese código incorporado. No se fuerza una versión mayor incompatible ni se oculta la alerta. El seguimiento corresponde a [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5).
