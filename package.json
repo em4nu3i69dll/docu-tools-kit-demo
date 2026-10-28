@@ -20,7 +20,7 @@
     "gif.js": "^0.2.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^1.61.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "5.4.530",
     "react": "^19.2.0",
