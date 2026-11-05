@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generar-paginas.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --test pruebas/*.test.js"
